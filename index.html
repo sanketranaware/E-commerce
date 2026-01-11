@@ -1,79 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Demo Store</title>
-<style>
-*{box-sizing:border-box;font-family:Arial}
-body{margin:0;background:#f5f5f5}
-header{background:#111;color:#fff;padding:15px;text-align:center}
-.container{padding:20px}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-.card{background:#fff;padding:15px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1)}
-.card img{width:100%;border-radius:5px}
-.card h3{margin:10px 0}
-.card button{background:#ff6a00;color:#fff;border:none;padding:10px;width:100%;border-radius:5px;cursor:pointer}
-.cart{position:fixed;top:0;right:0;background:#fff;width:300px;height:100%;padding:15px;box-shadow:-4px 0 10px rgba(0,0,0,.2)}
-.cart h2{text-align:center}
-.cart-item{display:flex;justify-content:space-between;margin:10px 0}
-.checkout{background:green;color:#fff;border:none;padding:12px;width:100%;border-radius:5px}
-@media(max-width:768px){
-.cart{position:static;width:100%;margin-top:20px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUXE | Curated Essentials</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .cart-drawer { transition: transform 0.3s ease-in-out; }
+        .product-card:hover img { transform: scale(1.05); }
+    </style>
 </head>
+<body class="bg-gray-50 text-gray-900">
 
-<body>
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tighter uppercase">Luxe</h1>
+            <div class="flex items-center gap-6">
+                <a href="#" class="text-sm font-medium hover:text-orange-600 transition">Shop</a>
+                <button onclick="toggleCart()" class="relative p-2 hover:bg-gray-100 rounded-full transition">
+                    <i data-lucide="shopping-bag"></i>
+                    <span id="cart-count" class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold px-1.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
 
-<header>
-<h1>Demo E-Commerce Store</h1>
-<p>Fast | Clean | Responsive</p>
-</header>
+    <header class="max-w-7xl mx-auto px-6 pt-12 pb-8">
+        <div class="bg-black rounded-3xl p-12 text-white flex flex-col items-center text-center">
+            <span class="text-orange-500 font-bold tracking-widest text-sm uppercase mb-4">New Collection 2026</span>
+            <h2 class="text-4xl md:text-6xl font-bold mb-6">Elevate Your Everyday.</h2>
+            <button class="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-orange-500 hover:text-white transition">Explore Catalog</button>
+        </div>
+    </header>
 
-<div class="container">
-<div class="products">
-<div class="card">
-<img src="https://picsum.photos/300/200?1">
-<h3>Product One</h3>
-<p>₹999</p>
-<button onclick="addToCart('Product One',999)">Add to Cart</button>
-</div>
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10" id="product-grid">
+            </div>
+    </main>
 
-<div class="card">
-<img src="https://picsum.photos/300/200?2">
-<h3>Product Two</h3>
-<p>₹1499</p>
-<button onclick="addToCart('Product Two',1499)">Add to Cart</button>
-</div>
+    <div id="cart-overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/40 hidden z-[60]"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 w-full max-w-md h-full bg-white z-[70] shadow-2xl translate-x-full cart-drawer flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h2 class="text-xl font-bold uppercase tracking-tight">Your Bag</h2>
+            <button onclick="toggleCart()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x"></i></button>
+        </div>
+        
+        <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+            </div>
 
-<div class="card">
-<img src="https://picsum.photos/300/200?3">
-<h3>Product Three</h3>
-<p>₹1999</p>
-<button onclick="addToCart('Product Three',1999)">Add to Cart</button>
-</div>
-</div>
+        <div class="p-6 border-t bg-gray-50">
+            <div class="flex justify-between text-lg font-bold mb-4">
+                <span>Total</span>
+                <span id="cart-total">₹0.00</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-orange-600 transition shadow-lg flex justify-center items-center gap-2">
+                Secure Checkout <i data-lucide="lock" class="w-4 h-4"></i>
+            </button>
+            <p class="text-center text-xs text-gray-400 mt-4 italic">Free shipping on orders over ₹5,000</p>
+        </div>
+    </div>
 
-<div class="cart">
-<h2>Cart</h2>
-<div id="cartItems"></div>
-<h3>Total: ₹<span id="total">0</span></h3>
-<button class="checkout">Checkout (Demo)</button>
-</div>
-</div>
+    <script>
+        // Real-world Data Structure
+        const products = [
+            { id: 1, name: 'Minimalist Chrono', price: 12999, category: 'Accessories', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800' },
+            { id: 2, name: 'Premium Sound Pods', price: 4999, category: 'Electronics', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800' },
+            { id: 3, name: 'Urban Leather Pack', price: 7500, category: 'Lifestyle', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800' }
+        ];
 
-<script>
-let total = 0;
-function addToCart(name, price){
-  total += price;
-  document.getElementById("total").innerText = total;
-  const div = document.createElement("div");
-  div.className = "cart-item";
-  div.innerHTML = `<span>${name}</span><span>₹${price}</span>`;
-  document.getElementById("cartItems").appendChild(div);
-}
-</script>
+        let cart = [];
 
+        // Render Products
+        const grid = document.getElementById('product-grid');
+        products.forEach(p => {
+            grid.innerHTML += `
+                <div class="product-card group cursor-pointer">
+                    <div class="relative overflow-hidden rounded-2xl bg-gray-200 aspect-square">
+                        <img src="${p.image}" class="w-full h-full object-cover transition-transform duration-500">
+                        <button onclick="addToCart(${p.id})" class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur text-black py-3 rounded-xl font-bold opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                            + Add to Bag
+                        </button>
+                    </div>
+                    <div class="mt-4 flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">${p.category}</p>
+                            <h3 class="font-semibold text-lg">${p.name}</h3>
+                        </div>
+                        <p class="font-bold text-orange-600">₹${p.price.toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCart();
+            if(document.getElementById('cart-drawer').classList.contains('translate-x-full')) {
+                toggleCart();
+            }
+        }
+
+        function updateCart() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+            const countEl = document.getElementById('cart-count');
+            
+            container.innerHTML = cart.length === 0 ? '<p class="text-center text-gray-400 mt-10">Your bag is empty.</p>' : '';
+            
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price;
+                container.innerHTML += `
+                    <div class="flex gap-4 animate-in fade-in slide-in-from-right-4">
+                        <img src="${item.image}" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm">${item.name}</h4>
+                            <p class="text-orange-600 font-semibold text-sm">₹${item.price.toLocaleString()}</p>
+                            <button onclick="removeItem(${index})" class="text-xs text-red-500 mt-2 underline">Remove</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            totalEl.innerText = `₹${total.toLocaleString()}`;
+            countEl.innerText = cart.length;
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('cart-overlay');
+            drawer.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function checkout() {
+            alert("Redirecting to Secure Stripe Gateway...");
+        }
+
+        // Initialize Icons
+        lucide.createIcons();
+    </script>
 </body>
 </html>
